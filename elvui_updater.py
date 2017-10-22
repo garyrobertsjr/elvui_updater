@@ -1,9 +1,7 @@
 from lxml import html
 import os, requests, re, zipfile
 
-# TODO: Load dir from config file or create upon first use
-WOW_DIR = "C:\\Program Files (x86)\\World of Warcraft"
-
+# TODO: Logging
 ''' Scrape ELVUI Downloads Page '''
 ELVUI = requests.get('https://www.tukui.org/download.php?ui=elvui')
 ELVUI_TREE = html.fromstring(ELVUI.content)
@@ -17,9 +15,9 @@ def prod_version():
     # Parse version
     return VERSION_RE.search(version_str).group()
 
-def local_version():
+def local_version(wow_dir):
     ''' Return version of local ELVUI install '''
-    toc_loc = WOW_DIR + '\\interface\\addons\\ElvUI\\ElvUI.toc'
+    toc_loc = wow_dir + '\\interface\\addons\\ElvUI\\ElvUI.toc'
 
     # Read addon TOC file
     try:
@@ -33,7 +31,7 @@ def local_version():
     version = VERSION_RE.search(toc_lines[2])
     return version.group()
 
-def update(version):
+def update(version, wow_dir):
     ''' Download and install newest ELVUI '''
     # Download zip
     local_filename = 'elvui_{:s}.zip'.format(version)
@@ -49,7 +47,7 @@ def update(version):
     elvui_zip = zipfile.ZipFile(local_filename, 'r')
 
     # Extract to addons folder
-    elvui_zip.extractall(path='{:s}{:s}'.format(WOW_DIR, '\\interface\\addons\\'))
+    elvui_zip.extractall(path='{:s}{:s}'.format(wow_dir, '\\interface\\addons\\'))
 
     # Cleanup
     elvui_zip.close()
@@ -57,15 +55,37 @@ def update(version):
 
 def main():
     ''' Update if version mismatch '''
-    local = local_version()
+    # Identify local install
+    try:
+        settings = open('settings', 'r')
+        wow_dir = settings.readline()
+        settings.close()
+
+    except FileNotFoundError:
+        invalid = True
+
+        # Configure WoW Dir
+        while invalid:
+            install_dir = input('Provide full URL for WoW Install Directory: ')
+            if os.path.exists(install_dir):
+                invalid = False
+                wow_dir = install_dir
+
+        # Write install dir to settings
+        settings = open('settings', 'w')
+        settings.write(install_dir)
+        settings.close()
+
+    # Get local and prod versions
+    local = local_version(wow_dir)
     prod = prod_version()
 
     print('Installed Version: {:s}'.format(local))
     print('Live Version: {:s}'.format(prod))
-    update(prod)
+
     if local != prod:
         print('Updating...')
-        update(prod)
+        update(prod, wow_dir)
         print('Update Complete')
 
 if __name__ == '__main__':
