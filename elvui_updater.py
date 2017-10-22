@@ -1,7 +1,5 @@
 from lxml import html
-import requests
-import re
-import zipfile
+import os, requests, re, zipfile
 
 # TODO: Load dir from config file or create upon first use
 WOW_DIR = "C:\\Program Files (x86)\\World of Warcraft"
@@ -50,6 +48,9 @@ def update(version):
     # Extract to addons folder
     elvui_zip.extractall(path='{:s}{:s}'.format(WOW_DIR, '\\interface\\addons\\'))
 
+    # Cleanup
+    elvui_zip.close()
+    os.remove(local_filename)
 
 def main():
     ''' Update if version mismatch '''
@@ -58,7 +59,7 @@ def main():
 
     print('Installed Version: {:s}'.format(local))
     print('Live Version: {:s}'.format(prod))
-
+    update(prod)
     if local != prod:
         print('Updating...')
         update(prod)
