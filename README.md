@@ -1,3 +1,4 @@
+
 # elvui_updater
 A script for automatically updating ELVUI when a new version is released.
 
@@ -17,3 +18,6 @@ This script will query the Elvui downloads page to determine if the local versio
 4. Follow the instructions in the Create Basic Task Wizard.
     
 Instructions from: [MS Technet](https://technet.microsoft.com/en-us/library/cc748993(v=ws.11).aspx#BKMK_winui)
+
+## Generating the settings file:
+In order to initialize the installer, the WoW installation folder needs to be specified in a plaintext settings file. This file should be named 'settings' and placed in the same directory as elvui_updater. The script will query the user for the full directory at runtime if the file is not present.
