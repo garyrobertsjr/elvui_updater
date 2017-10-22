@@ -22,9 +22,12 @@ def local_version():
     toc_loc = WOW_DIR + '\\interface\\addons\\ElvUI\\ElvUI.toc'
 
     # Read addon TOC file
-    toc = open(toc_loc, 'r')
-    toc_lines = toc.readlines()
-    toc.close()
+    try:
+        toc = open(toc_loc, 'r')
+        toc_lines = toc.readlines()
+        toc.close()
+    except FileNotFoundError:
+        return 'Not Installed'
 
     # Parse version string
     version = VERSION_RE.search(toc_lines[2])
